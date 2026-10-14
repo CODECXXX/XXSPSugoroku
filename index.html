@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#18121c">
+<title>XXSPSugoroku · 原型</title>
+<style>
+:root{color-scheme:dark;--bg:#18121c;--panel:#241a28;--tile:#302236;--ink:#f8eef6;--muted:#bcaabd;--accent:#eea6c8;--gold:#efcf91;--line:#523c55}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:24px 16px calc(24px + env(safe-area-inset-bottom));background:radial-gradient(ellipse at 50% -20%,#55344d 0,transparent 55%),var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(900px,100%);margin:0 auto}.eyebrow{color:var(--gold);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase}.head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:8px 0 20px}h1{font-size:clamp(1.5rem,5vw,2.3rem);margin:2px 0;font-weight:700;letter-spacing:.02em}.sub{color:var(--muted);font-size:.92rem}.badge{border:1px solid var(--line);border-radius:99px;padding:6px 10px;color:var(--gold);font-size:.75rem;white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,.8fr);gap:16px;align-items:start}.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,minmax(72px,1fr));gap:7px;padding:9px;border:1px solid var(--line);border-radius:18px;background:#1e1622;box-shadow:0 18px 48px #08050a66}.tile{min-width:0;display:flex;flex-direction:column;justify-content:space-between;padding:8px;border:1px solid #59435d;border-radius:12px;background:linear-gradient(145deg,#38283d,#2a1e30);font-size:.75rem}.tile .num{color:var(--muted);font-size:.65rem}.tile.start{background:linear-gradient(145deg,#5a3c4e,#3f2b43);border-color:#b87b9c}.tile.event{border-color:#9a7950}.tokens{display:flex;gap:4px;min-height:17px}.token{width:15px;height:15px;border-radius:50%;border:2px solid #fff8;box-shadow:0 1px 5px #0008}.p1{background:#ffb2d2}.p2{background:#a8c4ff}.center{grid-row:2/4;grid-column:2/4;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px}.center strong{font-size:1rem}.center span{color:var(--muted);font-size:.78rem;margin-top:6px}
+.panel{padding:18px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,#2d2031,#211823);box-shadow:0 18px 48px #08050a55}.panel h2{font-size:1rem;margin:0 0 12px}.turn{font-size:1.1rem;font-weight:700}.players{display:grid;gap:9px;margin:14px 0}.player{display:flex;justify-content:space-between;align-items:center;padding:10px 11px;border:1px solid var(--line);border-radius:11px;color:var(--muted)}.player.active{border-color:var(--accent);color:var(--ink);background:#eea6c812}.pname{display:flex;align-items:center;gap:8px}.dicebox{display:flex;align-items:center;gap:12px;margin:14px 0;padding:12px;border-radius:12px;background:#171119}.die{width:46px;height:46px;display:grid;place-items:center;border-radius:11px;background:#f7edf5;color:#251a28;font-size:1.6rem;font-weight:800}.buttons{display:grid;grid-template-columns:1fr auto;gap:8px}button{min-height:46px;border:0;border-radius:11px;padding:10px 14px;background:var(--accent);color:#281925;font:700 1rem inherit;cursor:pointer}button.secondary{background:#3a2c40;color:var(--ink);border:1px solid var(--line)}button:active{transform:translateY(1px)}button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}.eventlog{margin-top:14px;color:var(--muted);font-size:.84rem;min-height:2.5em}.note{margin:16px 2px 0;color:var(--muted);font-size:.78rem}.foot{margin-top:14px;color:#8f7c92;font-size:.72rem;text-align:center}
+@media(max-width:680px){body{padding:18px 12px calc(18px + env(safe-area-inset-bottom))}.layout{grid-template-columns:1fr}.board{grid-template-rows:repeat(4,minmax(64px,1fr));gap:5px;padding:7px}.tile{padding:6px;font-size:.68rem}.panel{padding:15px}.head{align-items:center}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header class="head"><div><div class="eyebrow">A mobile-first board-game prototype</div><h1>XXSPSugoroku</h1><div class="sub">网页框架测试版 · 主题与规则待设定</div></div><span class="badge">原型 0.1</span></header>
+<section class="layout" aria-label="游戏区域">
+<div class="board" id="board" aria-label="棋盘"></div>
+<aside class="panel"><h2>当前回合</h2><div class="turn" id="turn">玩家 1</div>
+<div class="players" id="players"></div>
+<div class="dicebox"><div class="die" id="die" aria-live="polite">—</div><div><strong>掷骰结果</strong><div class="sub" id="result">准备开始</div></div></div>
+<div class="buttons"><button id="roll">掷骰前进</button><button class="secondary" id="reset" aria-label="重新开始">重置</button></div>
+<div class="eventlog" id="log" aria-live="polite">这是部署验证用的基础回合：掷骰、移动、经过起点。</div>
+</aside></section>
+<p class="note">目前仅验证手机网页布局与基础移动。棋盘内容、角色、美术及正式玩法等你确定后再替换。</p>
+<div class="foot">无需安装 · 适配触屏 · GitHub Pages</div>
+</main>
+<script>
+const spaces=["起点","旧港","事件","面具铺","花园","休息站","剧场","事件","黑曜巷","钟楼","市集","旅店"];
+const positions=[[1,1],[1,2],[1,3],[1,4],[2,4],[3,4],[4,4],[4,3],[4,2],[4,1],[3,1],[2,1]];
+const players=[{name:"玩家 1",pos:0,money:1500,cls:"p1"},{name:"玩家 2",pos:0,money:1500,cls:"p2"}];
+let current=0;
+const board=document.querySelector("#board"),playerPanel=document.querySelector("#players"),turn=document.querySelector("#turn"),die=document.querySelector("#die"),result=document.querySelector("#result"),log=document.querySelector("#log");
+function render(){
+ board.innerHTML=spaces.map((name,i)=>{const [row,col]=positions[i];const tokens=players.filter(p=>p.pos===i).map(p=>`<span class="token ${p.cls}" title="${p.name}"></span>`).join("");return `<div class="tile ${i===0?"start":""} ${name==="事件"?"event":""}" style="grid-row:${row};grid-column:${col}"><span class="num">${String(i).padStart(2,"0")}</span><strong>${name}</strong><div class="tokens">${tokens}</div></div>`}).join("")+`<div class="center"><strong>棋盘原型</strong><span>格子与事件待定<br>可在手机触屏游玩</span></div>`;
+ playerPanel.innerHTML=players.map((p,i)=>`<div class="player ${i===current?"active":""}"><span class="pname"><span class="token ${p.cls}"></span>${p.name}</span><strong>¥${p.money}</strong></div>`).join("");
+ turn.textContent=players[current].name;
+}
+document.querySelector("#roll").addEventListener("click",()=>{const p=players[current],roll=Math.floor(Math.random()*6)+1,old=p.pos;p.pos=(p.pos+roll)%spaces.length;const passed=p.pos<old;if(passed)p.money+=200;die.textContent=roll;result.textContent=`${p.name} 到达「${spaces[p.pos]}」`;log.textContent=passed?`${p.name} 经过起点，暂得 ¥200。`:`${p.name} 前进 ${roll} 格。`;current=(current+1)%players.length;render()});
+document.querySelector("#reset").addEventListener("click",()=>{players.forEach(p=>{p.pos=0;p.money=1500});current=0;die.textContent="—";result.textContent="准备开始";log.textContent="已重置。掷骰开始测试。";render()});
+render();
+</script>
+</body>
+</html>
