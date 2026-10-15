@@ -1,48 +1,595 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#18121c">
-<title>XXSPSugoroku · 原型</title>
-<style>
-:root{color-scheme:dark;--bg:#18121c;--panel:#241a28;--tile:#302236;--ink:#f8eef6;--muted:#bcaabd;--accent:#eea6c8;--gold:#efcf91;--line:#523c55}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:24px 16px calc(24px + env(safe-area-inset-bottom));background:radial-gradient(ellipse at 50% -20%,#55344d 0,transparent 55%),var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main{width:min(900px,100%);margin:0 auto}.eyebrow{color:var(--gold);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase}.head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:8px 0 20px}h1{font-size:clamp(1.5rem,5vw,2.3rem);margin:2px 0;font-weight:700;letter-spacing:.02em}.sub{color:var(--muted);font-size:.92rem}.badge{border:1px solid var(--line);border-radius:99px;padding:6px 10px;color:var(--gold);font-size:.75rem;white-space:nowrap}
-.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,.8fr);gap:16px;align-items:start}.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,minmax(72px,1fr));gap:7px;padding:9px;border:1px solid var(--line);border-radius:18px;background:#1e1622;box-shadow:0 18px 48px #08050a66}.tile{min-width:0;display:flex;flex-direction:column;justify-content:space-between;padding:8px;border:1px solid #59435d;border-radius:12px;background:linear-gradient(145deg,#38283d,#2a1e30);font-size:.75rem}.tile .num{color:var(--muted);font-size:.65rem}.tile.start{background:linear-gradient(145deg,#5a3c4e,#3f2b43);border-color:#b87b9c}.tile.event{border-color:#9a7950}.tokens{display:flex;gap:4px;min-height:17px}.token{width:15px;height:15px;border-radius:50%;border:2px solid #fff8;box-shadow:0 1px 5px #0008}.p1{background:#ffb2d2}.p2{background:#a8c4ff}.center{grid-row:2/4;grid-column:2/4;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px}.center strong{font-size:1rem}.center span{color:var(--muted);font-size:.78rem;margin-top:6px}
-.panel{padding:18px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,#2d2031,#211823);box-shadow:0 18px 48px #08050a55}.panel h2{font-size:1rem;margin:0 0 12px}.turn{font-size:1.1rem;font-weight:700}.players{display:grid;gap:9px;margin:14px 0}.player{display:flex;justify-content:space-between;align-items:center;padding:10px 11px;border:1px solid var(--line);border-radius:11px;color:var(--muted)}.player.active{border-color:var(--accent);color:var(--ink);background:#eea6c812}.pname{display:flex;align-items:center;gap:8px}.dicebox{display:flex;align-items:center;gap:12px;margin:14px 0;padding:12px;border-radius:12px;background:#171119}.die{width:46px;height:46px;display:grid;place-items:center;border-radius:11px;background:#f7edf5;color:#251a28;font-size:1.6rem;font-weight:800}.buttons{display:grid;grid-template-columns:1fr auto;gap:8px}button{min-height:46px;border:0;border-radius:11px;padding:10px 14px;background:var(--accent);color:#281925;font:700 1rem inherit;cursor:pointer}button.secondary{background:#3a2c40;color:var(--ink);border:1px solid var(--line)}button:active{transform:translateY(1px)}button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}.eventlog{margin-top:14px;color:var(--muted);font-size:.84rem;min-height:2.5em}.note{margin:16px 2px 0;color:var(--muted);font-size:.78rem}.foot{margin-top:14px;color:#8f7c92;font-size:.72rem;text-align:center}
-@media(max-width:680px){body{padding:18px 12px calc(18px + env(safe-area-inset-bottom))}.layout{grid-template-columns:1fr}.board{grid-template-rows:repeat(4,minmax(64px,1fr));gap:5px;padding:7px}.tile{padding:6px;font-size:.68rem}.panel{padding:15px}.head{align-items:center}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3efe6">
+  <title>XXSPSugoroku</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f3efe6;
+      --surface: #fcfaf5;
+      --surface-2: #ebe4d7;
+      --ink: #352f28;
+      --muted: #81776a;
+      --line: #d9d0c1;
+      --accent: #947558;
+      --accent-dark: #72563d;
+      --accent-soft: #e8dccb;
+      --choice: #137c3d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button { font: inherit; }
+    main { width:min(1240px,100%); margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin:0 0 18px; }
+    h1 { margin:0; font-size:clamp(1.45rem,4vw,2rem); letter-spacing:.015em; font-weight:650; }
+    .game { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+    .map-frame { position:relative; width:100%; }
+    .map-viewport { width:100%; height:min(78vh,720px); min-height:500px; overflow:auto; overscroll-behavior:contain; border:1px solid var(--line); border-radius:16px; background:var(--surface); cursor:grab; scrollbar-width:thin; touch-action:pan-x pan-y; }
+    .map-viewport.dragging { cursor:grabbing; user-select:none; }
+    .route-toast { position:absolute; z-index:5; top:14px; left:50%; transform:translate(-50%,-5px); color:var(--choice); font-size:1.05rem; font-weight:750; letter-spacing:.03em; text-shadow:0 1px 4px #fcfaf5,0 0 8px #fcfaf5; opacity:0; pointer-events:none; transition:opacity .18s ease,transform .18s ease; white-space:nowrap; }
+    .route-toast.visible { transform:translate(-50%,0); opacity:1; }
+    .map-world { position:relative; overflow:hidden; }
+    .map-content { position:absolute; left:0; top:0; transform-origin:top left; background-color:var(--surface); background-image:radial-gradient(circle at 15% 18%,#e8dfd0 0 1px,transparent 1.5px),radial-gradient(circle at 78% 68%,#e8dfd0 0 1px,transparent 1.5px); background-size:73px 67px,91px 83px; }
+    .map-zoom { position:absolute; z-index:6; top:14px; right:14px; display:flex; gap:8px; }
+    .map-zoom button { display:grid; width:42px; height:42px; place-items:center; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); box-shadow:0 2px 8px #352f2820; font-size:1.5rem; font-weight:600; cursor:pointer; }
+    .map-zoom button:disabled { opacity:.45; cursor:default; }
+    .map-links { position:absolute; inset:0; overflow:visible; }
+    .edge-visible { fill:none; stroke:#3d342c; stroke-width:9; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#arrowHead); pointer-events:none; }
+    .edge.active .edge-visible,.edge.selected .edge-visible { stroke:var(--choice); stroke-width:14; filter:drop-shadow(0 0 5px #137c3d99); }
+    .edge-hit { fill:none; stroke:transparent; stroke-width:56; stroke-linecap:round; stroke-linejoin:round; pointer-events:stroke; cursor:pointer; }
+    .edge-hit:focus-visible { stroke:#137c3d55; outline:none; }
+    .tile { position:absolute; z-index:1; width:104px; height:104px; transform:translate(-50%,-50%); display:grid; place-items:center; border:6px double #443a32; border-radius:50%; background:#f8f1e4; }
+    .tile::before { content:""; position:absolute; z-index:0; inset:6px; border:1px solid #443a32; border-radius:50%; pointer-events:none; }
+    .tile::after { content:""; position:absolute; z-index:0; inset:9px; border-radius:50%; background:repeating-conic-gradient(#443a32 0deg 2.6deg,transparent 2.6deg 12deg); -webkit-mask:radial-gradient(circle,transparent 0 66%,#000 70% 80%,transparent 84%); mask:radial-gradient(circle,transparent 0 66%,#000 70% 80%,transparent 84%); opacity:.75; pointer-events:none; }
+    .tile.question { border-style:dotted; }
+    .tile.reward { border-color:#b38730; background:#f7edcf; }
+    .tile.start,.tile.finish { background:#eadbc4; box-shadow:inset 0 0 0 2px #f8f1e4; }
+    .tile.finish { border-width:4px; }
+    .tile.visited { background:#cfe6d2; border-color:#2f6b3f; }
+    .tile.visited::before,.tile.visited::after { border-color:#2f6b3f; }
+    .tile-icon { position:relative; z-index:1; display:grid; width:62%; max-width:68px; aspect-ratio:1; place-items:center; color:#1f1b17; }
+    .tile-icon svg { width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round; }
+    .tile-icon .question-mark { font:72px/1 Georgia,serif; }
+    .tile-icon .star-mark { color:#a8791b; font:52px/1 Georgia,serif; }
+    .token { position:absolute; z-index:2; top:4px; right:4px; width:14px; height:14px; border:2px solid var(--surface); border-radius:50%; background:var(--accent); box-shadow:0 0 0 1px #443a32; animation:token-hop .32s cubic-bezier(.2,.8,.25,1); }
+    @keyframes token-hop { 0%{transform:translateY(2px) scale(.82)} 55%{transform:translateY(-5px) scale(1.16)} 100%{transform:translateY(0) scale(1)} }
+    .die.rolling { animation:dice-rattle .11s ease-in-out infinite alternate; }
+    @keyframes dice-rattle { from{transform:rotate(-8deg) translateY(-1px)} to{transform:rotate(8deg) translateY(1px)} }
+    .panel { padding:16px; border:1px solid var(--line); border-radius:16px; background:var(--surface); }
+    .progress { margin:12px 0; }
+    .progress-copy { display:flex; justify-content:space-between; color:var(--muted); font-size:.72rem; }
+    .progress-track { height:6px; margin-top:6px; overflow:hidden; border-radius:99px; background:var(--surface-2); }
+    .progress-fill { display:block; width:0; height:100%; border-radius:inherit; background:var(--accent); transition:width .25s ease; }
+    .die-row { display:flex; align-items:center; gap:11px; margin:13px 0; padding:10px; border-radius:11px; background:#f4f0e8; }
+    .die { display:grid; width:44px; height:44px; place-items:center; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--accent-dark); font-size:1.55rem; font-weight:700; }
+    .die-caption { font-size:.79rem; font-weight:600; }
+    .die-result { margin-top:2px; color:var(--muted); font-size:.7rem; }
+    .actions { display:grid; grid-template-columns:1fr auto; gap:7px; }
+    .action { min-height:44px; padding:9px 12px; border:1px solid var(--accent); border-radius:10px; background:var(--accent); color:#fffdf8; font-weight:650; cursor:pointer; }
+    .action.secondary { border-color:var(--line); background:transparent; color:var(--ink); }
+    .action:disabled { opacity:.55; cursor:wait; }
+    button:focus-visible { outline:3px solid #b49470; outline-offset:2px; }
+    .node-subui { position:fixed; z-index:20; inset:0; display:grid; place-items:center; padding:18px; background:#211b1590; }
+    .node-subui[hidden],.node-subui [hidden] { display:none; }
+    .node-card { width:min(420px,100%); padding:22px; border:1px solid var(--line); border-radius:16px; background:var(--surface); box-shadow:0 16px 60px #211b1550; text-align:center; }
+    .node-card h2 { margin:0 0 8px; color:var(--accent-dark); font-size:1.25rem; }
+    .node-description { margin:0 0 16px; color:var(--muted); font-size:.88rem; }
+    .node-dice { display:flex; align-items:center; justify-content:center; gap:12px; margin:0 0 16px; }
+    .node-dice .die { width:58px; height:58px; font-size:2rem; }
+    .node-dice-operator { color:var(--muted); font-size:1.3rem; font-weight:700; }
+    .node-result { margin:0 0 16px; color:var(--ink); font-size:1rem; font-weight:650; }
+    .node-card .action { width:100%; }
+    .map-length-field { display:grid; gap:7px; margin:16px 0; color:var(--muted); text-align:left; font-size:.86rem; }
+    .map-length-field input { width:100%; min-height:44px; padding:8px 10px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--ink); font:inherit; }
+    @media (max-width:700px) {
+      body { padding:16px 11px calc(16px + env(safe-area-inset-bottom)); }
+      .map-viewport { height:min(72vh,620px); min-height:420px; }
+      .tile { width:82px; height:82px; }
+      .topbar { margin-bottom:13px; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; }
+      .die.rolling,.token,.prompt:not([hidden]) { animation:none!important; }
+    }
+  </style>
 </head>
 <body>
 <main>
-<header class="head"><div><div class="eyebrow">A mobile-first board-game prototype</div><h1>XXSPSugoroku</h1><div class="sub">网页框架测试版 · 主题与规则待设定</div></div><span class="badge">原型 0.1</span></header>
-<section class="layout" aria-label="游戏区域">
-<div class="board" id="board" aria-label="棋盘"></div>
-<aside class="panel"><h2>当前回合</h2><div class="turn" id="turn">玩家 1</div>
-<div class="players" id="players"></div>
-<div class="dicebox"><div class="die" id="die" aria-live="polite">—</div><div><strong>掷骰结果</strong><div class="sub" id="result">准备开始</div></div></div>
-<div class="buttons"><button id="roll">掷骰前进</button><button class="secondary" id="reset" aria-label="重新开始">重置</button></div>
-<div class="eventlog" id="log" aria-live="polite">这是部署验证用的基础回合：掷骰、移动、经过起点。</div>
-</aside></section>
-<p class="note">目前仅验证手机网页布局与基础移动。棋盘内容、角色、美术及正式玩法等你确定后再替换。</p>
-<div class="foot">无需安装 · 适配触屏 · GitHub Pages</div>
+  <header class="topbar"><h1>XXSPSugoroku</h1><button class="action secondary" id="randomMap" type="button">随机地图</button></header>
+  <section class="game" aria-label="游戏区域">
+    <div class="map-frame">
+      <div class="map-viewport" id="mapViewport" aria-label="棋盘">
+        <div class="map-world" id="board"><div class="map-content" id="mapContent"></div></div>
+      </div>
+      <div class="map-zoom" aria-label="地图缩放"><button id="zoomOut" type="button" aria-label="缩小地图" title="缩小">−</button><button id="zoomIn" type="button" aria-label="放大地图" title="放大">+</button></div>
+      <div class="route-toast" id="routeToast" role="status" aria-live="polite">请选择支线</div>
+    </div>
+    <aside class="panel">
+      <div class="progress" aria-label="行程进度">
+        <div class="progress-copy"><span>前进进度</span><strong id="progressText">0 / 0 格 · 起点</strong></div>
+        <div class="progress-track"><span class="progress-fill" id="progressFill"></span></div>
+      </div>
+      <div class="die-row"><div class="die" id="die" aria-live="polite">—</div><div><div class="die-caption">掷骰结果</div><div class="die-result" id="dieResult">点击掷骰后自动前进</div></div></div>
+      <div class="actions"><button class="action" id="roll" type="button">掷骰并前进</button><button class="action secondary" id="reset" type="button">重置</button></div>
+      <div class="log" id="log"></div>
+    </aside>
+  </section>
 </main>
+<div class="node-subui" id="nodeSubui" hidden>
+  <section class="node-card" role="dialog" aria-modal="true" aria-labelledby="nodeSubuiTitle" aria-describedby="nodeSubuiDescription">
+    <h2 id="nodeSubuiTitle"></h2>
+    <p class="node-description" id="nodeSubuiDescription"></p>
+    <div class="node-dice" aria-live="polite"><span class="die" id="nodeDieA">—</span><span class="node-dice-operator" id="nodeDiceOperator">×</span><span class="die" id="nodeDieB">—</span></div>
+    <p class="node-result" id="nodeResult" hidden></p>
+    <button class="action" id="nodeRoll" type="button"></button>
+    <button class="action secondary" id="nodeContinue" type="button" hidden></button>
+  </section>
+</div>
+<div class="node-subui" id="mapSetup" hidden>
+  <form class="node-card" id="mapSetupForm" role="dialog" aria-modal="true" aria-labelledby="mapSetupTitle">
+    <h2 id="mapSetupTitle">随机地图</h2>
+    <label class="map-length-field" for="mapLength">前进格数<input id="mapLength" type="number" min="7" max="100" step="1" value="50" required></label>
+    <label class="map-length-field" for="mapQuestions">问号格数<input id="mapQuestions" type="number" min="0" max="20" step="1" value="3" required></label>
+    <label class="map-length-field" for="mapRewards">星号格数<input id="mapRewards" type="number" min="0" max="20" step="1" value="2" required></label>
+    <label class="map-length-field" for="mapShortcuts">近道数量<input id="mapShortcuts" type="number" min="0" max="20" step="1" value="6" required></label>
+    <button class="action" type="submit">生成地图</button>
+  </form>
+</div>
 <script>
-const spaces=["起点","旧港","事件","面具铺","花园","休息站","剧场","事件","黑曜巷","钟楼","市集","旅店"];
-const positions=[[1,1],[1,2],[1,3],[1,4],[2,4],[3,4],[4,4],[4,3],[4,2],[4,1],[3,1],[2,1]];
-const players=[{name:"玩家 1",pos:0,money:1500,cls:"p1"},{name:"玩家 2",pos:0,money:1500,cls:"p2"}];
-let current=0;
-const board=document.querySelector("#board"),playerPanel=document.querySelector("#players"),turn=document.querySelector("#turn"),die=document.querySelector("#die"),result=document.querySelector("#result"),log=document.querySelector("#log");
-function render(){
- board.innerHTML=spaces.map((name,i)=>{const [row,col]=positions[i];const tokens=players.filter(p=>p.pos===i).map(p=>`<span class="token ${p.cls}" title="${p.name}"></span>`).join("");return `<div class="tile ${i===0?"start":""} ${name==="事件"?"event":""}" style="grid-row:${row};grid-column:${col}"><span class="num">${String(i).padStart(2,"0")}</span><strong>${name}</strong><div class="tokens">${tokens}</div></div>`}).join("")+`<div class="center"><strong>棋盘原型</strong><span>格子与事件待定<br>可在手机触屏游玩</span></div>`;
- playerPanel.innerHTML=players.map((p,i)=>`<div class="player ${i===current?"active":""}"><span class="pname"><span class="token ${p.cls}"></span>${p.name}</span><strong>¥${p.money}</strong></div>`).join("");
- turn.textContent=players[current].name;
+const mapPadding = 100;
+const mapLengthParam = Number(new URLSearchParams(window.location.search).get("moves"));
+const questionParam = new URLSearchParams(window.location.search).get("questions");
+const rewardParam = new URLSearchParams(window.location.search).get("rewards");
+const shortcutParam = new URLSearchParams(window.location.search).get("shortcuts");
+const mapLength = Number.isInteger(mapLengthParam) && mapLengthParam >= 7 && mapLengthParam <= 100 ? mapLengthParam : 50;
+const tileRadius = 52;
+const spaces = [];
+const tools = [["巴掌","palm"],["板子","board"],["戒尺","ruler"],["藤条","cane"],["发刷","brush"],["皮带","belt"]];
+const poses = ["俯身扶桌", "跪伏在软垫上", "伏在膝上", "侧卧屈膝"];
+const toolTypes = new Set(tools.map(([,type]) => type));
+function addSpace(label,type,x,y,step) {
+  const id = spaces.length;
+  spaces.push({label,type,step,x,y,next:[]});
+  return id;
 }
-document.querySelector("#roll").addEventListener("click",()=>{const p=players[current],roll=Math.floor(Math.random()*6)+1,old=p.pos;p.pos=(p.pos+roll)%spaces.length;const passed=p.pos<old;if(passed)p.money+=200;die.textContent=roll;result.textContent=`${p.name} 到达「${spaces[p.pos]}」`;log.textContent=passed?`${p.name} 经过起点，暂得 ¥200。`:`${p.name} 前进 ${roll} 格。`;current=(current+1)%players.length;render()});
-document.querySelector("#reset").addEventListener("click",()=>{players.forEach(p=>{p.pos=0;p.money=1500});current=0;die.textContent="—";result.textContent="准备开始";log.textContent="已重置。掷骰开始测试。";render()});
+function connect(from,to) { spaces[from].next.push(to); }
+function randomKind() { return tools[Math.floor(Math.random() * tools.length)]; }
+const shortcutLimit = shortcutParam === null ? 6 : Math.max(0,Math.min(20,Number(shortcutParam) || 0));
+const questionLimit = questionParam === null ? 3 : Math.max(0,Math.min(20,Number(questionParam) || 0));
+const rewardLimit = rewardParam === null ? 2 : Math.max(0,Math.min(20,Number(rewardParam) || 0));
+const cell = 212;
+const targetAspect = 2.25;
+const rowCount = Math.max(2,Math.ceil(Math.sqrt((mapLength + 1) / targetAspect)));
+const columns = Math.max(4,Math.ceil((mapLength + 1) / rowCount));
+const stepAt = (row,column) => {
+  if (row < 0 || row >= rowCount || column < 0 || column >= columns) return -1;
+  const index = row % 2 === 0 ? column : columns - 1 - column;
+  const step = row * columns + index;
+  return step <= mapLength ? step : -1;
+};
+const columnOfStep = Array.from({length:mapLength + 1},(_,step) => {
+  const row = Math.floor(step / columns);
+  return row % 2 === 0 ? step % columns : columns - 1 - (step % columns);
+});
+const worldWidth = mapPadding * 2 + (columns - 1) * cell;
+const worldHeight = mapPadding * 2 + (rowCount - 1) * cell;
+const mainLane = Array.from({length:mapLength + 1},(_,step) => {
+  const [label,type] = step === 0 ? ["起点","start"] : step === mapLength ? ["终点","finish"] : randomKind();
+  return addSpace(label,type,mapPadding + columnOfStep[step] * cell,mapPadding + Math.floor(step / columns) * cell,step);
+});
+const start = mainLane[0];
+const finish = mainLane[mapLength];
+for (let step = 0; step < mapLength; step++) connect(mainLane[step],mainLane[step + 1]);
+const crossLinks = [];
+const candidates = Array.from({length:mapLength + 1},(_,step) => step).sort(() => Math.random() - .5);
+for (const step of candidates) {
+  if (crossLinks.length >= shortcutLimit) break;
+  if (spaces[mainLane[step]].next.length > 1) continue;
+  const target = stepAt(Math.floor(step / columns) + 1,columnOfStep[step]);
+  if (target < 0 || target - step < 2 || target - step > 5) continue;
+  connect(mainLane[step],mainLane[target]);
+  crossLinks.push(step);
+}
+const specialCandidates = spaces.map((space,index) => index).filter(index => spaces[index].type !== "start" && spaces[index].type !== "finish");
+for (const [label,type,limit] of [["问号","question",questionLimit],["奖励","reward",rewardLimit]]) {
+  for (let count = 0; count < limit && specialCandidates.length; count++) {
+    const candidateIndex = Math.floor(Math.random() * specialCandidates.length);
+    const id = specialCandidates.splice(candidateIndex,1)[0];
+    spaces[id].label = label;
+    spaces[id].type = type;
+  }
+}
+function maxStepsFrom(id) {
+  if (id === finish) return 0;
+  return 1 + Math.max(...spaces[id].next.map(maxStepsFrom));
+}
+const maxMoves = maxStepsFrom(start);
+const player = { position: 0 };
+const visitedIds = new Set([0]);
+let movesTaken = 0;
+let routeGoal = maxMoves;
+let pendingSteps = 0;
+let chosenNext = null;
+let awaitingChoice = false;
+let awaitingNodeAction = false;
+let pendingNodeAction = null;
+let isMoving = false;
+let gameOver = false;
+const $ = (selector) => document.querySelector(selector);
+const board = $("#board");
+const mapContent = $("#mapContent");
+const mapViewport = $("#mapViewport");
+const zoomOutButton = $("#zoomOut");
+const zoomInButton = $("#zoomIn");
+const randomMapButton = $("#randomMap");
+const mapSetup = $("#mapSetup");
+const mapSetupForm = $("#mapSetupForm");
+const mapLengthInput = $("#mapLength");
+const mapQuestionsInput = $("#mapQuestions");
+const mapRewardsInput = $("#mapRewards");
+const mapShortcutsInput = $("#mapShortcuts");
+const nodeSubui = $("#nodeSubui");
+const nodeSubuiTitle = $("#nodeSubuiTitle");
+const nodeSubuiDescription = $("#nodeSubuiDescription");
+const nodeDieA = $("#nodeDieA");
+const nodeDieB = $("#nodeDieB");
+const nodeDiceOperator = $("#nodeDiceOperator");
+const nodeResult = $("#nodeResult");
+const nodeRollButton = $("#nodeRoll");
+const nodeContinueButton = $("#nodeContinue");
+const routeToast = $("#routeToast");
+const dieFaces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+let mapZoom = .375;
+const minMapZoom = .05;
+const maxMapZoom = 2.4;
+let panStart = null;
+let routeToastTimer = null;
+function showRouteToast(message = "请选择支线") {
+  clearTimeout(routeToastTimer);
+  routeToast.textContent = message;
+  routeToast.classList.add("visible");
+  routeToastTimer = setTimeout(() => routeToast.classList.remove("visible"),1800);
+}
+function hideRouteToast() {
+  clearTimeout(routeToastTimer);
+  routeToast.classList.remove("visible");
+}
+function tileIcon(type) {
+  const icons = {
+    palm: '<svg viewBox="0 0 100 100"><path d="M24 56V31c0-8 12-8 12 0v18-25c0-8 12-8 12 0v24-21c0-8 12-8 12 0v21-15c0-8 12-8 12 0v22l7-7c6-6 15 2 10 8l-13 15c-6 6-13 9-23 9H44c-14 0-20-10-20-24v-3c0-7 12-7 12 0"/></svg>',
+    board: '<svg viewBox="0 0 100 100"><g transform="rotate(-30 50 50)"><path d="M14 42h38c3 0 5 2 5 5h20a5 5 0 010 10H57c0 3-2 5-5 5H14a6 6 0 01-6-6v-8a6 6 0 016-6z"/></g></svg>',
+    ruler: '<svg viewBox="0 0 100 100"><g transform="rotate(-13 50 50)"><rect x="6" y="45" width="88" height="14" rx="1"/><path d="M15 45v6M23 45v10M31 45v6M39 45v10M47 45v6M55 45v10M63 45v6M71 45v10M79 45v6M87 45v10"/></g></svg>',
+    cane: '<svg viewBox="0 0 100 100"><path d="M62 88V32c0-10-7-16-16-16S30 22 30 32c0 8 6 13 13 13"/><path d="M62 44c8 0 13 5 13 12"/></svg>',
+    brush: '<svg viewBox="0 0 100 100"><g transform="rotate(-16 50 50)"><path d="M50 52L18 72a5 5 0 006 8l34-20"/><ellipse cx="63" cy="40" rx="21" ry="17"/><path d="M63 20v-7M77 25l5-5M84 40h7M78 55l5 5M63 60v6M49 27l-5-5M56 57l-4 7"/></g></svg>',
+    belt: '<svg viewBox="0 0 100 100"><g transform="rotate(-42 50 50)"><rect x="14" y="45" width="66" height="19" rx="3"/><rect x="48" y="39" width="27" height="30" rx="3"/><path d="M61.5 42v25"/><circle cx="26" cy="54.5" r="3" style="fill:currentColor;stroke:none"/><circle cx="37" cy="54.5" r="3" style="fill:currentColor;stroke:none"/></g></svg>',
+    start: '<svg viewBox="0 0 100 100"><path d="M50 14L14 46h13v40h46V46h13z"/><path d="M42 86V62h16v24"/></svg>',
+    finish: '<svg viewBox="0 0 100 100"><path d="M26 84V16M28 20h46L60 42l14 22H28"/></svg>',
+    question: '<span class="question-mark">?</span>',
+    reward: '<span class="star-mark">★</span>'
+  };
+  return icons[type] || icons.palm;
+}
+function edgeGeometry(from,to) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const distance = Math.hypot(dx,dy);
+  const ux = dx / distance;
+  const uy = dy / distance;
+  const sx = from.x + ux * (tileRadius + 2);
+  const sy = from.y + uy * (tileRadius + 2);
+  const ex = to.x - ux * (tileRadius + 2);
+  const ey = to.y - uy * (tileRadius + 2);
+  if (dx === 0 || dy === 0) return {d:`M${sx},${sy} L${ex},${ey}`};
+  const skew = 0.3;
+  const midY = (from.y + to.y) / 2;
+  const midTop = from.x + (to.x - from.x) * skew;
+  const midBottom = to.x + (from.x - to.x) * skew;
+  return {d:`M${sx},${sy} L${midTop},${midY} L${midBottom},${midY} L${ex},${ey}`};
+}
+function renderBoard() {
+  board.style.width = `${worldWidth * mapZoom}px`;
+  board.style.height = `${worldHeight * mapZoom}px`;
+  mapContent.style.width = `${worldWidth}px`;
+  mapContent.style.height = `${worldHeight}px`;
+  mapContent.style.transform = `scale(${mapZoom})`;
+  const edgeData = spaces.flatMap((space,fromIndex) => space.next.map(toIndex => {
+    const active = awaitingChoice && player.position === fromIndex;
+    const selected = player.position === fromIndex && chosenNext === toIndex;
+    const geometry = edgeGeometry(space,spaces[toIndex]);
+    const classes = ["edge",active ? "active" : "",selected ? "selected" : ""].filter(Boolean).join(" ");
+    const marker = active || selected ? "arrowHeadActive" : "arrowHead";
+    const line = `<g class="${classes}"><path class="edge-visible" d="${geometry.d}" marker-end="url(#${marker})"/></g>`;
+    const hit = active ? `<path class="edge-hit" d="${geometry.d}" data-from="${fromIndex}" data-to="${toIndex}" tabindex="0" role="button" aria-label="选择路线：前往${spaces[toIndex].label}"/>` : "";
+    return {line,hit};
+  }));
+  const nodes = spaces.map((space,index) => {
+    const token = player.position === index ? '<span class="token" title="你的棋子" aria-label="你的棋子"></span>' : "";
+    const visited = visitedIds.has(index) && index !== player.position ? " visited" : "";
+    return `<div class="tile ${space.type}${visited}" style="left:${space.x}px;top:${space.y}px" aria-label="${space.label}">
+      <span class="tile-icon" aria-hidden="true">${tileIcon(space.type)}</span>${token}
+    </div>`;
+  }).join("");
+  const svg = `<svg class="map-links" width="${worldWidth}" height="${worldHeight}" viewBox="0 0 ${worldWidth} ${worldHeight}" role="group" aria-label="路线箭头"><defs><marker id="arrowHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="22" markerHeight="22" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5 0 10Z" fill="#3d342c"/></marker><marker id="arrowHeadActive" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="28" markerHeight="28" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5 0 10Z" fill="#137c3d"/></marker></defs>${edgeData.map(edge=>edge.line).join("")}${edgeData.map(edge=>edge.hit).join("")}</svg>`;
+  mapContent.innerHTML = `${svg}${nodes}`;
+  zoomOutButton.disabled = mapZoom <= minMapZoom;
+  zoomInButton.disabled = mapZoom >= maxMapZoom;
+}
+function renderStatus() {
+  $("#progressText").textContent = `${movesTaken} / ${routeGoal} 格 · ${spaces[player.position].label}`;
+  $("#progressFill").style.width = `${movesTaken / routeGoal * 100}%`;
+}
+function render() { renderBoard(); renderStatus(); }
+function zoomMap(nextZoom,clientX,clientY) {
+  const zoom = Math.max(minMapZoom,Math.min(maxMapZoom,nextZoom));
+  if (zoom === mapZoom) return;
+  const rect = mapViewport.getBoundingClientRect();
+  const anchorX = clientX === undefined ? mapViewport.clientWidth / 2 : clientX - rect.left - mapViewport.clientLeft;
+  const anchorY = clientY === undefined ? mapViewport.clientHeight / 2 : clientY - rect.top - mapViewport.clientTop;
+  const worldX = (mapViewport.scrollLeft + anchorX) / mapZoom;
+  const worldY = (mapViewport.scrollTop + anchorY) / mapZoom;
+  mapZoom = zoom;
+  renderBoard();
+  mapViewport.scrollLeft = worldX * mapZoom - anchorX;
+  mapViewport.scrollTop = worldY * mapZoom - anchorY;
+}
+function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
+function openNodeSubui(action,space) {
+  pendingNodeAction = action;
+  awaitingNodeAction = true;
+  nodeSubuiTitle.textContent = action === "tool" ? "工具节点" : "问号节点";
+  nodeSubuiDescription.textContent = action === "tool" ? `固定工具：${space.label} · 掷两颗骰子，点数相乘` : "掷一颗骰子，点数决定额外前进格数";
+  nodeDieA.textContent = "—";
+  nodeDieB.textContent = "—";
+  nodeDieB.hidden = action === "question";
+  nodeDiceOperator.hidden = action === "question";
+  nodeResult.hidden = true;
+  nodeRollButton.hidden = false;
+  nodeRollButton.disabled = false;
+  nodeRollButton.textContent = action === "tool" ? "掷两颗骰子" : "掷骰并前进";
+  nodeContinueButton.hidden = true;
+  nodeContinueButton.textContent = action === "tool" ? "完成" : "继续前进";
+  nodeSubui.hidden = false;
+}
+async function animateNodeDice(values) {
+  const dice = values.length === 1 ? [nodeDieA] : [nodeDieA,nodeDieB];
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    dice.forEach((die,index) => die.textContent = dieFaces[values[index] - 1]);
+    return;
+  }
+  dice.forEach(die => die.classList.add("rolling"));
+  const timer = setInterval(() => dice.forEach(die => die.textContent = dieFaces[Math.floor(Math.random() * dieFaces.length)]),80);
+  await wait(760);
+  clearInterval(timer);
+  dice.forEach((die,index) => {
+    die.classList.remove("rolling");
+    die.textContent = dieFaces[values[index] - 1];
+  });
+}
+async function rollNodeAction() {
+  if (!awaitingNodeAction || isMoving) return;
+  setBusy(true);
+  nodeRollButton.disabled = true;
+  if (pendingNodeAction === "tool") {
+    const first = 1 + Math.floor(Math.random() * 6);
+    const second = 1 + Math.floor(Math.random() * 6);
+    await animateNodeDice([first,second]);
+    nodeResult.textContent = `${first} × ${second} = ${first * second} 次 · 姿势：${pick(poses)}`;
+  } else {
+    const steps = 1 + Math.floor(Math.random() * 6);
+    await animateNodeDice([steps]);
+    pendingSteps = steps;
+    nodeResult.textContent = `掷出 ${steps} 点，额外前进 ${steps} 格`;
+  }
+  nodeResult.hidden = false;
+  nodeRollButton.hidden = true;
+  nodeContinueButton.hidden = false;
+  setBusy(false);
+  nodeContinueButton.focus();
+}
+async function finishNodeAction() {
+  if (!awaitingNodeAction || isMoving) return;
+  const action = pendingNodeAction;
+  awaitingNodeAction = false;
+  pendingNodeAction = null;
+  nodeSubui.hidden = true;
+  if (action === "question") {
+    setBusy(true);
+    await continueMovement();
+    return;
+  }
+  setBusy(false);
+  if (awaitingChoice) showRouteToast();
+}
+function resetGame() {
+  player.position = 0;
+  visitedIds.clear();
+  visitedIds.add(0);
+  movesTaken = 0;
+  routeGoal = maxMoves;
+  pendingSteps = 0;
+  chosenNext = null;
+  awaitingChoice = false;
+  awaitingNodeAction = false;
+  pendingNodeAction = null;
+  gameOver = false;
+  nodeSubui.hidden = true;
+  hideRouteToast();
+  $("#die").textContent = "—";
+  $("#dieResult").textContent = "点击掷骰后自动前进";
+  $("#log").textContent = "";
+  render();
+  setBusy(false);
+}
+function setBusy(busy) {
+  isMoving = busy;
+  $("#roll").disabled = busy || gameOver || awaitingChoice || awaitingNodeAction;
+  $("#reset").disabled = busy || awaitingNodeAction;
+  randomMapButton.disabled = busy || awaitingNodeAction;
+}
+function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+async function animateDie(value) {
+  const die = $("#die");
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    die.textContent = dieFaces[value - 1];
+    return;
+  }
+  die.classList.add("rolling");
+  let face = 0;
+  const timer = setInterval(() => {
+    die.textContent = dieFaces[face++ % dieFaces.length];
+  }, 90);
+  await wait(760);
+  clearInterval(timer);
+  die.classList.remove("rolling");
+  die.textContent = dieFaces[value - 1];
+}
+async function continueMovement() {
+  while (pendingSteps > 0) {
+    const current = spaces[player.position];
+    let nextIndex;
+    if (chosenNext !== null) {
+      nextIndex = chosenNext;
+      chosenNext = null;
+    } else if (current.next.length > 1) {
+      awaitingChoice = true;
+      showRouteToast();
+      $("#log").textContent = "";
+      render();
+      setBusy(false);
+      return;
+    } else if (current.next.length === 1) {
+      nextIndex = current.next[0];
+    } else {
+      break;
+    }
+    player.position = nextIndex;
+    movesTaken += 1;
+    pendingSteps -= 1;
+    visitedIds.add(nextIndex);
+    render();
+    const stepDelay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 40 : 360;
+    await wait(stepDelay);
+  }
+  const landed = spaces[player.position];
+  gameOver = landed.type === "finish";
+  if (gameOver) routeGoal = movesTaken;
+  const branchChoiceRequired = !gameOver && landed.next.length > 1 && chosenNext === null;
+  if (branchChoiceRequired) awaitingChoice = true;
+  if (gameOver) {
+    $("#dieResult").textContent = "抵达终点";
+    $("#log").textContent = "抵达终点！本局完成。";
+  } else if (toolTypes.has(landed.type)) {
+    openNodeSubui("tool",landed);
+    $("#log").textContent = "";
+  } else if (landed.type === "question") {
+    openNodeSubui("question",landed);
+    $("#log").textContent = "";
+  } else if (landed.type === "reward") {
+    showRouteToast("暂无奖励");
+    $("#log").textContent = "";
+  } else if (awaitingChoice) {
+    showRouteToast();
+    $("#log").textContent = "";
+  } else {
+    $("#log").textContent = `自动前进，停在「${landed.label}」。`;
+  }
+  render();
+  setBusy(false);
+}
+async function rollAndMove() {
+  if (isMoving || gameOver || awaitingChoice || awaitingNodeAction) return;
+  setBusy(true);
+  const roll = 1 + Math.floor(Math.random() * 6);
+  pendingSteps = roll;
+  $("#dieResult").textContent = "正在掷骰…";
+  await animateDie(roll);
+  $("#dieResult").textContent = `掷出 ${roll} 点`;
+  await continueMovement();
+}
+async function chooseBranch(fromIndex,toIndex) {
+  if (!awaitingChoice || awaitingNodeAction || isMoving || fromIndex !== player.position) return;
+  awaitingChoice = false;
+  hideRouteToast();
+  chosenNext = toIndex;
+  routeGoal = movesTaken + 1 + maxStepsFrom(toIndex);
+  render();
+  if (pendingSteps > 0) {
+    setBusy(true);
+    await continueMovement();
+  } else {
+    setBusy(false);
+  }
+}
+zoomOutButton.addEventListener("click",() => zoomMap(mapZoom / 1.2));
+zoomInButton.addEventListener("click",() => zoomMap(mapZoom * 1.2));
+mapViewport.addEventListener("wheel",event => {
+  event.preventDefault();
+  const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaMode === 2 ? event.deltaY * mapViewport.clientHeight : event.deltaY;
+  zoomMap(mapZoom * Math.exp(-delta * .001),event.clientX,event.clientY);
+},{passive:false});
+board.addEventListener("click",event => {
+  const edge = event.target.closest(".edge-hit");
+  if (edge) chooseBranch(Number(edge.dataset.from),Number(edge.dataset.to));
+});
+board.addEventListener("keydown",event => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  const edge = event.target.closest(".edge-hit");
+  if (!edge) return;
+  event.preventDefault();
+  chooseBranch(Number(edge.dataset.from),Number(edge.dataset.to));
+});
+mapViewport.addEventListener("pointerdown",event => {
+  if ((event.pointerType !== "mouse" && event.pointerType !== "pen") || event.button !== 0 || event.target.closest(".edge-hit")) return;
+  panStart = {x:event.clientX,y:event.clientY,left:mapViewport.scrollLeft,top:mapViewport.scrollTop};
+  mapViewport.classList.add("dragging");
+  mapViewport.setPointerCapture(event.pointerId);
+});
+mapViewport.addEventListener("pointermove",event => {
+  if (!panStart) return;
+  mapViewport.scrollLeft = panStart.left - (event.clientX - panStart.x);
+  mapViewport.scrollTop = panStart.top - (event.clientY - panStart.y);
+});
+function endPan() { panStart = null; mapViewport.classList.remove("dragging"); }
+mapViewport.addEventListener("pointerup",endPan);
+mapViewport.addEventListener("pointercancel",endPan);
+randomMapButton.addEventListener("click",() => {
+  if (isMoving || awaitingNodeAction) return;
+  mapLengthInput.value = String(mapLength);
+  mapQuestionsInput.value = String(questionLimit);
+  mapRewardsInput.value = String(rewardLimit);
+  mapShortcutsInput.value = String(shortcutLimit);
+  mapSetup.hidden = false;
+  mapLengthInput.focus();
+});
+mapSetupForm.addEventListener("submit",event => {
+  event.preventDefault();
+  if (!mapSetupForm.reportValidity()) return;
+  const nextUrl = new URL(window.location.href);
+  nextUrl.searchParams.set("moves",String(Number(mapLengthInput.value)));
+  nextUrl.searchParams.set("questions",String(Number(mapQuestionsInput.value)));
+  nextUrl.searchParams.set("rewards",String(Number(mapRewardsInput.value)));
+  nextUrl.searchParams.set("shortcuts",String(Number(mapShortcutsInput.value)));
+  nextUrl.searchParams.set("map",String(Date.now()));
+  window.location.assign(nextUrl.href);
+});
+$("#roll").addEventListener("click", rollAndMove);
+$("#reset").addEventListener("click", () => { if (!isMoving && !awaitingNodeAction) resetGame(); });
+nodeRollButton.addEventListener("click", rollNodeAction);
+nodeContinueButton.addEventListener("click", finishNodeAction);
+const visibleColumns = Math.min(columns,9);
+mapZoom = Math.max(minMapZoom,Math.min(1,(mapViewport.clientWidth - 48) / (visibleColumns * cell)));
 render();
+mapViewport.scrollTop = 0;
 </script>
 </body>
 </html>
